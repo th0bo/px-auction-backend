@@ -1,5 +1,5 @@
 import * as express from "express";
-import { Sequelize } from "sequelize";
+import { Sequelize, QueryTypes } from "sequelize";
 import { configDotenv } from "dotenv";
 
 const app = express();
@@ -23,8 +23,11 @@ app.get('/', (req, res) => {
   res.send('Hello World!')
 });
 
-app.post("/", (req, res) => {
-  
+app.get('/api/pixels', async (req, res) => {
+  const results = ((await sequelize.query(`select color from public."Pixel"`, { type: QueryTypes.SELECT })) as Array<{ color: string }>).map(({ color }) => color);
+  const order = Math.round(Math.sqrt(results.length));
+  const board = Array.from({ length: order }).map((_v, y) => results.slice(y * order, (y + 1) * order));
+  res.send(board);
 });
 
 app.listen(port, () => {
